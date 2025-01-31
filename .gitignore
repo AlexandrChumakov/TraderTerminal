@@ -1,0 +1,50 @@
+### .gitignore template
+...# Default by Rider
+
+/packages/
+
+riderModule.iml
+
+/_ReSharper.Caches/
+
+
+# Rider
+
+.idea
+
+
+# Build results
+
+[Dd]ebug/
+
+[Bb]in/
+
+[Oo]bj/
+
+
+# Visual Studio
+
+.vs/
+
+или 
+
+# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/modules.xml
+/contentModel.xml
+/.idea.HttpServer.iml
+/projectSettingsUpdater.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+.idea
+*.db
