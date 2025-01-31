@@ -3,16 +3,15 @@ using Trader.Models;
 
 namespace Trader;
 
-public class BitfinexConnector : IBitfinexConnector
+public class BitfinexConnector(IRestClient restClient) : IBitfinexConnector
 {
-    public Task<IEnumerable<Trade>> GetNewTradesAsync(string pair, int maxCount)
-    {
-    }
+    public Task<IEnumerable<Trade>> GetNewTradesAsync(string pair, int maxCount) =>
+        restClient.GetNewTradesAsync(pair, maxCount);
 
     public Task<IEnumerable<Candle>> GetCandleSeriesAsync(string pair, int periodInSec, DateTimeOffset? from,
-        long? count = 0, DateTimeOffset? to = null)
-    {
-    }
+        long? count = 0, DateTimeOffset? to = null) =>
+        restClient.GetCandleSeriesAsync(pair, periodInSec, from, count, to);
+
 
     public event Action<Trade>? NewBuyTrade;
     public event Action<Trade>? NewSellTrade;
