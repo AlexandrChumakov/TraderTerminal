@@ -3,7 +3,7 @@ using Trader.Models;
 
 namespace Trader;
 
-public class BitfinexConnector(IRestClient restClient) : IBitfinexConnector
+public class Connector(IRestClient restClient) : IConnector
 {
     public Task<IEnumerable<Trade>> GetNewTradesAsync(string pair, int maxCount) =>
         restClient.GetNewTradesAsync(pair, maxCount);

@@ -2,7 +2,7 @@ using Trader.Models;
 
 namespace Trader.Interfaces;
 
-public interface IBitfinexConnector
+public interface IConnector
 {
     Task<IEnumerable<Trade>> GetNewTradesAsync(string pair, int maxCount);
 

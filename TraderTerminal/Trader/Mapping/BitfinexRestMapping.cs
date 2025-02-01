@@ -1,4 +1,7 @@
 using System.Text.Json;
+using Polly;
+using Polly.Retry;
+using RestSharp;
 using Trader.Models;
 
 namespace Trader.Mapping;
@@ -20,6 +23,14 @@ public static class BitfinexRestMapping
         [1_209_600] = "14D",
         [2_592_000] = "1M"
     };
+
+    public static AsyncRetryPolicy<RestResponse> GetPolicy()
+    {
+        return Policy.Handle<HttpRequestException>().OrResult<RestResponse>(r =>
+                !r.IsSuccessful && (int)r.StatusCode >= 500 && (int)r.StatusCode < 600)
+            .WaitAndRetryAsync(retryCount: 3,
+                sleepDurationProvider: attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)));
+    }
 
     public static IEnumerable<Trade> ToTrades(this string json, string pair)
     {
@@ -75,7 +86,7 @@ public static class BitfinexRestMapping
 
     public static Ticker ToTicker(this string json, string pair)
     {
-        var items = JsonSerializer.Deserialize<float[]>(json);
+        var items = JsonSerializer.Deserialize<decimal[]>(json);
 
         if (items!.Length < 10)
             return new Ticker();
