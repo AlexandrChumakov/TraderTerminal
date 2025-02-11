@@ -2,6 +2,7 @@ using Polly.Retry;
 using RestSharp;
 using Trader.Mapping;
 using Trader.Models;
+using Trader.Services;
 using IRestClient = Trader.Interfaces.IRestClient;
 
 namespace Trader.Clients;
@@ -9,10 +10,11 @@ namespace Trader.Clients;
 public class BitfinexRestClient : IRestClient
 {
     private const string Api = "https://api-pub.bitfinex.com/v2/";
-    private static readonly AsyncRetryPolicy<RestResponse> Policy = BitfinexRestMapping.GetPolicy();
+    private static readonly AsyncRetryPolicy<RestResponse> Policy = Reconnect.GetRestPolicy();
 
     public async Task<IEnumerable<Trade>> GetNewTradesAsync(string pair, long maxCount)
     {
+        pair = pair.ToUpper();
         var client = new RestClient(new RestClientOptions(Api));
         var request = new RestRequest($"trades/t{pair}/hist?limit={maxCount}");
         request.AddHeader("accept", "application/json");
@@ -25,6 +27,7 @@ public class BitfinexRestClient : IRestClient
     public async Task<IEnumerable<Candle>> GetCandleSeriesAsync(string pair, int periodInSec, DateTimeOffset? from,
         long? count, DateTimeOffset? to = null)
     {
+        pair = pair.ToUpper();
         var client = new RestClient(new RestClientOptions(Api));
         var request = new RestRequest($"candles/trade%3A{periodInSec.ConvertSecondsToIntervalStrict()}%3At{pair}");
 
@@ -45,6 +48,7 @@ public class BitfinexRestClient : IRestClient
 
     public async Task<Ticker> GetTickerInfo(string pair)
     {
+        pair = pair.ToUpper();
         var client = new RestClient(new RestClientOptions(Api));
         var request = new RestRequest($"ticker/{pair}");
         var response = await ExecuteWithRetryAsync(client, request);

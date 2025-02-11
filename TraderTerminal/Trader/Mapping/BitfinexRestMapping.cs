@@ -1,37 +1,10 @@
 using System.Text.Json;
-using Polly;
-using Polly.Retry;
-using RestSharp;
 using Trader.Models;
 
 namespace Trader.Mapping;
 
 public static class BitfinexRestMapping
 {
-    private static readonly Dictionary<int, string> SecondsToInterval = new()
-    {
-        [60] = "1m",
-        [300] = "5m",
-        [900] = "15m",
-        [1_800] = "30m",
-        [3_600] = "1h",
-        [10_800] = "3h",
-        [21_600] = "6h",
-        [43_200] = "12h",
-        [86_400] = "1D",
-        [604_800] = "1W",
-        [1_209_600] = "14D",
-        [2_592_000] = "1M"
-    };
-
-    public static AsyncRetryPolicy<RestResponse> GetPolicy()
-    {
-        return Policy.Handle<HttpRequestException>().OrResult<RestResponse>(r =>
-                !r.IsSuccessful && (int)r.StatusCode >= 500 && (int)r.StatusCode < 600)
-            .WaitAndRetryAsync(retryCount: 3,
-                sleepDurationProvider: attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)));
-    }
-
     public static IEnumerable<Trade> ToTrades(this string json, string pair)
     {
         var rows = JsonSerializer.Deserialize<List<decimal[]>>(json);
@@ -106,7 +79,4 @@ public static class BitfinexRestMapping
             Low = items[9]
         };
     }
-
-    public static string ConvertSecondsToIntervalStrict(this int seconds) =>
-        SecondsToInterval.GetValueOrDefault(seconds, "1m");
 }
