@@ -9,7 +9,6 @@ public interface IConnector
     Task<IEnumerable<Candle>> GetCandleSeriesAsync(string pair, int periodInSec, DateTimeOffset? from,
         long? count = 0, DateTimeOffset? to = null);
 
-
     event Action<Trade> NewBuyTrade;
     event Action<Trade> NewSellTrade;
 
