@@ -71,13 +71,13 @@ public class BitfinexWsClient : IWsClient
         foreach (var traidePair in _tradePairs)
         {
             await Task.Delay(100, _cts.Token);
-            SendTradesRequest(traidePair, "subscribe");
+            SendTradesRequest(traidePair);
         }
 
         foreach (var candlePair in _candlePairs)
         {
             await Task.Delay(100, _cts.Token);
-            SendCandlesRequest(candlePair.pair, candlePair.periodInSec, "subscribe", candlePair.from,
+            SendCandlesRequest(candlePair.pair, candlePair.periodInSec, candlePair.from,
                 candlePair.to);
         }
     }
@@ -101,14 +101,25 @@ public class BitfinexWsClient : IWsClient
     {
         _tradePairs.Add(pair);
 
-        _ = EnsureConnectedAndSendAsync(() => SendTradesRequest(pair, "subscribe"));
+        _ = EnsureConnectedAndSendAsync(() => SendTradesRequest(pair));
     }
 
     public void UnsubscribeTrades(string pair)
     {
+        var chanId = GetChannelIdByPair(pair, "trades");
+        if (!chanId.HasValue) return;
+        var unsubscribeRequest = new
+        {
+            @event = "unsubscribe",
+            chanId = chanId.Value
+        };
+        _tradePairs.RemoveWhere(p => p == pair);
+        _subscriptions.Remove(chanId.Value);
+        var json = JsonSerializer.Serialize(unsubscribeRequest);
+        Send(json);
     }
 
-    private void SendTradesRequest(string pair, string type)
+    private void SendTradesRequest(string pair)
     {
         if (!IsWebSocketOpen()) return;
 
@@ -116,7 +127,7 @@ public class BitfinexWsClient : IWsClient
 
         var request = new
         {
-            @event = type,
+            @event = "subscribe",
             channel = "trades",
             pair = symbolPair
         };
@@ -133,15 +144,25 @@ public class BitfinexWsClient : IWsClient
     {
         _candlePairs.Add((pair, periodInSec, from, to));
 
-        _ = EnsureConnectedAndSendAsync(() => SendCandlesRequest(pair, periodInSec, "subscribe", from, to));
+        _ = EnsureConnectedAndSendAsync(() => SendCandlesRequest(pair, periodInSec, from, to));
     }
 
     public void UnsubscribeCandles(string pair)
     {
-        throw new NotImplementedException();
+        var chanId = GetChannelIdByPair(pair, "candles");
+        if (!chanId.HasValue) return;
+        var unsubscribeRequest = new
+        {
+            @event = "unsubscribe",
+            chanId = chanId.Value
+        };
+        _candlePairs.RemoveWhere(p => p.pair == pair);
+        _subscriptions.Remove(chanId.Value);
+        var json = JsonSerializer.Serialize(unsubscribeRequest);
+        Send(json);
     }
 
-    private void SendCandlesRequest(string pair, int periodInSec, string type, DateTimeOffset? from,
+    private void SendCandlesRequest(string pair, int periodInSec, DateTimeOffset? from,
         DateTimeOffset? to)
     {
         if (!IsWebSocketOpen()) return;
@@ -157,7 +178,7 @@ public class BitfinexWsClient : IWsClient
 
         var request = new
         {
-            @event = type,
+            @event = "subscribe",
             chenel = "candles",
             key = requestStr
         };
@@ -211,8 +232,8 @@ public class BitfinexWsClient : IWsClient
 
             _subscriptions[chanId] = new SubscriptionInfo
             {
-                Channel = channel,
-                KeyOrPair = keyOrPair
+                Channel = channel!,
+                KeyOrPair = keyOrPair!
             };
         }
         else if (json.StartsWith('['))
@@ -271,4 +292,13 @@ public class BitfinexWsClient : IWsClient
     }
 
     #endregion
+
+    private int? GetChannelIdByPair(string pair, string chennelType)
+    {
+        var subscription = _subscriptions.FirstOrDefault(s =>
+            s.Value.Channel.Equals(chennelType, StringComparison.OrdinalIgnoreCase) &&
+            s.Value.KeyOrPair.Equals(pair, StringComparison.OrdinalIgnoreCase));
+
+        return subscription.Value != null ? subscription.Key : null;
+    }
 }
