@@ -22,11 +22,8 @@ public static class Reconnect
             .Or<Exception>()
             .WaitAndRetryAsync(
                 retryCount: 5,
-                sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), // Экспоненциальная задержка
-                onRetry: (exception, timespan, retryAttempt, context) =>
-                {
-                    Console.WriteLine($"[BitfinexWsClient] Ошибка подключения: {exception.Message}. Попытка {retryAttempt}. Повтор через {timespan.TotalSeconds}с.");
-                }
+                sleepDurationProvider: retryAttempt =>
+                    TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
             );
     }
 }

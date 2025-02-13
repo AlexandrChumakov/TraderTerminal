@@ -50,7 +50,7 @@ public class BitfinexRestClient : IRestClient
     {
         pair = pair.ToUpper();
         var client = new RestClient(new RestClientOptions(Api));
-        var request = new RestRequest($"ticker/{pair}");
+        var request = new RestRequest($"ticker/t{pair}");
         var response = await ExecuteWithRetryAsync(client, request);
         return response.Content!.ToTicker(pair);
     }

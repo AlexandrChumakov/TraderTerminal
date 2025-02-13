@@ -1,6 +1,6 @@
 namespace Trader.Services;
 
-public static class Converter
+public static class TimeConverter
 {
     private static readonly Dictionary<int, string> SecondsToInterval = new()
     {
