@@ -1,0 +1,145 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:TraderUI.ViewModels"
+        xmlns:models="clr-namespace:Trader.Models;assembly=Trader"
+        xmlns:models1="clr-namespace:TraderUI.Models"
+        x:Class="TraderUI.Views.MainWindow"
+        Title="Trader UI" Width="800" Height="600">
+
+    <Window.DataContext>
+        <vm:MainWindowViewModel />
+    </Window.DataContext>
+
+    <TabControl x:DataType="vm:MainWindowViewModel">
+        <TabItem Header="Портфель">
+            <StackPanel Margin="10" Spacing="10">
+                <TextBlock Text="Ваш портфель:"></TextBlock>
+                <ItemsControl ItemsSource="{Binding PortfolioAssets}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models1:PortfolioAsset">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <TextBlock Text="{Binding Symbol}" />
+                                <TextBlock Text=":" />
+                                <TextBlock Text="{Binding Amount}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Button Content="Рассчитать портфель"
+                        Command="{Binding CalculatePortfolioCommand}"
+                        Width="200" Height="30" />
+                <TextBlock Text="Результаты расчёта:" FontWeight="Bold" Margin="0,10,0,0" />
+
+                <ItemsControl ItemsSource="{Binding PortfolioResults}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models1:PortfolioResult">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <TextBlock Text="{Binding TargetCurrency}" />
+                                <TextBlock Text=":" />
+                                <TextBlock Text="{Binding TotalValue}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </TabItem>
+
+        <TabItem Header="Коннектор">
+            <ScrollViewer>
+                <StackPanel Margin="10" Spacing="10">
+                    <Expander Header="Торговые сделки" IsExpanded="True">
+                        <StackPanel Margin="5" Spacing="5">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <TextBlock Text="Пара:" VerticalAlignment="Center" />
+                                <TextBox Text="{Binding TradesPair}" Width="100" />
+                                <TextBlock Text="Max Count:" VerticalAlignment="Center" />
+                                <TextBox Text="{Binding TradesMaxCount}" Width="50" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <Button Content="Подписаться" Command="{Binding SubscribeTradesCommand}" />
+                                <Button Content="Отписаться" Command="{Binding UnsubscribeTradesCommand}" />
+                            </StackPanel>
+
+                            <TextBlock Text="Buy сделки:" FontWeight="Bold" />
+                            <ItemsControl ItemsSource="{Binding BuyTrades}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="models:Trade">
+                                        <StackPanel Orientation="Horizontal" Spacing="5">
+                                            <TextBlock Text="{Binding Pair}" />
+                                            <TextBlock Text="Цена:" />
+                                            <TextBlock Text="{Binding Price}" />
+                                            <TextBlock Text="Кол-во:" />
+                                            <TextBlock Text="{Binding Amount}" />
+                                            <TextBlock Text="Время:" />
+                                            <TextBlock Text="{Binding Time}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Text="Sell сделки:" FontWeight="Bold" Margin="0,10,0,0" />
+                            <ItemsControl ItemsSource="{Binding SellTrades}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="models:Trade">
+                                        <StackPanel Orientation="Horizontal" Spacing="5">
+                                            <TextBlock Text="{Binding Pair}" />
+                                            <TextBlock Text="Цена:" />
+                                            <TextBlock Text="{Binding Price}" />
+                                            <TextBlock Text="Кол-во:" />
+                                            <TextBlock Text="{Binding Amount}" />
+                                            <TextBlock Text="Время:" />
+                                            <TextBlock Text="{Binding Time}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Expander>
+
+                    <Expander Header="Свечи" IsExpanded="True">
+                        <StackPanel Margin="5" Spacing="5">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <TextBlock Text="Пара:" VerticalAlignment="Center" />
+                                <TextBox Text="{Binding CandlesPair}" Width="100" />
+                                <TextBlock Text="Период (сек):" VerticalAlignment="Center" />
+                                <TextBox Text="{Binding CandlesPeriodInSec}" Width="50" />
+                                <TextBlock Text="Count:" VerticalAlignment="Center" />
+                                <TextBox Text="{Binding CandlesCount}" Width="50" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <Button Content="Подписаться" Command="{Binding SubscribeCandlesCommand}" />
+                                <Button Content="Отписаться" Command="{Binding UnsubscribeCandlesCommand}" />
+                            </StackPanel>
+
+                            <TextBlock Text="Свечи:" FontWeight="Bold" />
+                            <ItemsControl ItemsSource="{Binding Candles}">
+                                <ItemsControl.ItemTemplate>
+
+                                    <DataTemplate x:DataType="models:Candle">
+                                        <StackPanel Orientation="Horizontal" Spacing="5">
+                                            <TextBlock Text="{Binding Pair}" />
+                                            <TextBlock Text="Открытие:" />
+                                            <TextBlock Text="{Binding OpenPrice}" />
+                                            <TextBlock Text="Макс:" />
+                                            <TextBlock Text="{Binding HighPrice}" />
+                                            <TextBlock Text="Мин:" />
+                                            <TextBlock Text="{Binding LowPrice}" />
+                                            <TextBlock Text="Закрытие:" />
+                                            <TextBlock Text="{Binding ClosePrice}" />
+                                            <TextBlock Text="Объём:" />
+                                            <TextBlock Text="{Binding TotalVolume}" />
+                                            <TextBlock Text="Время:" />
+                                            <TextBlock Text="{Binding OpenTime}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Expander>
+                </StackPanel>
+            </ScrollViewer>
+        </TabItem>
+    </TabControl>
+</Window>
